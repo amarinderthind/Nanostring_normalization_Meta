@@ -1,17 +1,19 @@
+### This scripts is Merge/Integrate various Packages and functions for NANostring Normalization using RUVg (Where no replicates are available b/w different batches) and RUVIII (Coming Soon)
 
-setwd('/Users/athind/Dropbox/Nanostring/CSCC cell lines data for analysis/progression_panel/')
-datadir <- "/Users/athind/Dropbox/Nanostring/CSCC cell lines data for analysis/progression_panel"
+setwd('/Data_drectory_of_RCC_files')
+datadir <- "/Users/Data_drectory_of_RCC_files"
 
 ##################################
+source('functions.r')
 
 ## Quality control of .rcc files
-library(NanoStringNCTools)
+library(NanoStringNCTools) ## Bioconductor packages for Nanostring QC
 library(ggthemes)
 library(ggiraph)
 
 files.RCC <- dir(datadir, pattern = "*\\.RCC$", full.names = TRUE)
 files.RCC
-sample_annotation <- file.path(datadir, "meta_info.csv")
+sample_annotation <- file.path(datadir, "meta_info.csv")  ##Conditions are defined in the coulmn "Group"
 sample_annotation
 demoData <- readNanoStringRccSet(files.RCC, rlfFile = NULL, phenoDataFile = sample_annotation, phenoDataRccColName = "RCC")
 
@@ -56,6 +58,7 @@ protocolData <- as.data.frame(demoData@protocolData@data)
 
 
 ##### RUVg BASED analysis
+## https://academic.oup.com/bib/advance-article/doi/10.1093/bib/bbaa163/5891144
 ## removed this step because RUVg doesnot consider the technical replicates and after removal of calibrator, not found any gene associated with biology of interest.
 
 cIdx <- fData$GeneName[fData$CodeClass == "Housekeeping"]
@@ -65,7 +68,7 @@ rownames(raw_expression) = fData$Gene
 rownames(pData) = colnames(raw_expression)
 
 
-#### CHECK IF HK ARE ASSOCIATED WITH PRIMARY PHENO
+#### CHECK IF HK ARE ASSOCIATED WITH PRIMARY PHENOTYPE
 hk_raw = raw_expression[cIdx,]
 pval = vector(length = nrow(hk_raw))
 
@@ -104,7 +107,7 @@ library(limma)
 library(matrixStats)
 
 
-k = 3
+k = 3  ## Please check the original paper for more details ## iteration of plots using different K values are recommended
 
 vsd = RUV_total(raw_expression,pData,fData,k = k, exclude = exc)$vsd ## put exclude if there any hk associated with biology of interest 
 set = RUV_total(raw_expression,pData,fData,k = k, exclude = exc )$set # ,exclude = exc
@@ -117,9 +120,7 @@ write.csv(normalizedcount,"normalized_count_Ruvg_based_.csv")
 nordata <- log2(normalizedcount)
 RLEplot_mod(nordata,pData$Run) ### function is defined below
 
-
-
-p <-pca(nordata, metadata = pData, removeVar = 0.1) ## -- removing the lower 10% of variables based on variance
+p <-pca(nordata, metadata = pData, removeVar = 0.01) ## -- removing the lower 1% of variables based on variance
 #biplot(p)
 
 biplot(p,
@@ -143,10 +144,10 @@ dds <- DESeq(dds)
 
 #temp_count <- as.data.frame(counts(dds,normalized=TRUE))
 
-firstC <- 'CL'
-SecondC <- 'MET'
-contrast<- c("Group",firstC,SecondC)
+firstC <- 'CL'    ##condition 1
+SecondC <- 'MET'   ## condition 2
 
+contrast<- c("Group",firstC,SecondC)
 
 #### Valcano Plot #####
 res_valcanoplot <- results(dds,contrast =contrast)
@@ -177,7 +178,7 @@ res_deseq2[, nam] <- as.logical(res_deseq2$log2FoldChange > 0)
 res_deseq2$threshold <- as.logical(res_deseq2$padj < 0.05)  #Threshold defined earlier
 row.names(res_deseq2)[which(res_deseq2$threshold)]
 
-filename <- paste0('Deseq_ruvg_k_',k,'_DEA_pri_met_pri_nonMet.csv')
+filename <- paste0('Deseq_ruvg_k_',k,'_DEA_',firstC,'_',SecondC,'.csv')
 
 norm_mean <- sapply( levels(dds$Group), function(lvl) rowMeans( counts(dds,normalized=TRUE)[,dds$Group == lvl, drop=F] ) )
 colnames(norm_mean) <- paste('Rowmean_exp_',levels(dds$Group),sep='')
