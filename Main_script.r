@@ -144,15 +144,16 @@ dds <- DESeq(dds)
 
 #temp_count <- as.data.frame(counts(dds,normalized=TRUE))
 
-firstC <- 'CL'    ##condition 1
-SecondC <- 'MET'   ## condition 2
-
+firstC <- 'CL'
+SecondC <- 'MET'
 contrast<- c("Group",firstC,SecondC)
 
+
 #### Valcano Plot #####
+plotMA(results(dds,contrast =contrast))
+res_deseq2 <- as.data.frame(results(dds,contrast =contrast))
+
 res_valcanoplot <- results(dds,contrast =contrast)
- 
-plotMA(res_valcanoplot, ylim=c(-2,2))
 
 library(EnhancedVolcano)
 EnhancedVolcano(res_valcanoplot,
@@ -178,7 +179,7 @@ res_deseq2[, nam] <- as.logical(res_deseq2$log2FoldChange > 0)
 res_deseq2$threshold <- as.logical(res_deseq2$padj < 0.05)  #Threshold defined earlier
 row.names(res_deseq2)[which(res_deseq2$threshold)]
 
-filename <- paste0('Deseq_ruvg_k_',k,'_DEA_',firstC,'_',SecondC,'.csv')
+filename <- paste0('Deseq_ruvg_k_',k,'_DEA_pri_met_pri_nonMet.csv')
 
 norm_mean <- sapply( levels(dds$Group), function(lvl) rowMeans( counts(dds,normalized=TRUE)[,dds$Group == lvl, drop=F] ) )
 colnames(norm_mean) <- paste('Rowmean_exp_',levels(dds$Group),sep='')
@@ -187,6 +188,3 @@ res3 <- cbind(norm_mean,res_deseq2)
 res3 <- res3[,-3]
 
 write.csv(res3,filename)
-
-
-
