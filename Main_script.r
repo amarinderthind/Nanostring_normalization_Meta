@@ -70,6 +70,8 @@ rownames(pData) = colnames(raw_expression)
 
 
 #### CHECK IF HK ARE ASSOCIATED WITH PRIMARY PHENOTYPE
+## exclude hk genes which are associated with phenotype
+
 hk_raw = raw_expression[cIdx,]
 pval = vector(length = nrow(hk_raw))
 
@@ -85,8 +87,7 @@ sum(pval <= .05)
 summary(reg)
 idx <- pval <= .05
 #View(hk_raw[idx,])
-exc <- row.names(hk_raw[idx, ])
-## include these genes into exc e.g. exc <- c('MTMR14') 
+exc <- row.names(hk_raw[idx, ]) ## save these genes into exc and pass to RUV_total 
 
 ################
 
