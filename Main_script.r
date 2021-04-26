@@ -10,6 +10,7 @@ source('functions.r')
 library(NanoStringNCTools) ## Bioconductor packages for Nanostring QC
 library(ggthemes)
 library(ggiraph)
+library(PCAtools)
 
 files.RCC <- dir(datadir, pattern = "*\\.RCC$", full.names = TRUE)
 files.RCC
@@ -166,7 +167,7 @@ EnhancedVolcano(res_valcanoplot,
                 lab = rownames(res_valcanoplot),
                 x = 'log2FoldChange',
                 y = 'pvalue',
-                title = 'PriMet vs PriNoMet',
+                title = 'Condition 1 vs Condition 2',
                 pCutoff = 0.01,
                 FCcutoff = 0.58,
                 pointSize = 2.0,
@@ -179,7 +180,7 @@ res_deseq2[, nam] <- as.logical(res_deseq2$log2FoldChange > 0)
 res_deseq2$threshold <- as.logical(res_deseq2$padj < 0.05)  #Threshold defined earlier
 row.names(res_deseq2)[which(res_deseq2$threshold)]
 
-filename <- paste0('Deseq_ruvg_k_',k,'_DEA_pri_met_pri_nonMet.csv')
+filename <- paste0('Deseq_ruvg_k_',k,'_DEA_.csv')
 
 norm_mean <- sapply( levels(dds$Group), function(lvl) rowMeans( counts(dds,normalized=TRUE)[,dds$Group == lvl, drop=F] ) )
 colnames(norm_mean) <- paste('Rowmean_exp_',levels(dds$Group),sep='')
