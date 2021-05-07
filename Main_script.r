@@ -14,7 +14,7 @@ library(PCAtools)
 
 files.RCC <- dir(datadir, pattern = "*\\.RCC$", full.names = TRUE)
 files.RCC
-sample_annotation <- file.path(datadir, "meta_info.csv")  ##Conditions are defined in the coulmn "Group"
+sample_annotation <- file.path(datadir, "meta_info.csv")  ##Conditions/treatment/normal are defined in the coulmn "Group"
 sample_annotation
 demoData <- readNanoStringRccSet(files.RCC, rlfFile = NULL, phenoDataFile = sample_annotation, phenoDataRccColName = "RCC")
 
