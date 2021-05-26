@@ -33,7 +33,7 @@ with( nonControlSubset( demoData ) , table( CodeClass ) )
 
 
 ## extracting the expression data
-exprs_df <- transform( assayData( demoData )[["exprs_norm"]] )
+exprs_df <- transform( assayData( demoData )[["exprs"]] )
 
 ## QC plots 
 girafe( ggobj = autoplot( demoData , "lane-bindingDensity" ) )
