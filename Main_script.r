@@ -139,7 +139,7 @@ biplot(p,
 
 dds <- DESeqDataSetFromMatrix(countData = counts(set),
                               colData = pData(set),
-                              design = ~ Group) #counts(set)[1:652,],
+                              design = ~ Group) #counts(set)[1:652,], ##use design with W_1 or W_2 based on k value
 
 dds <- DESeq(dds)
 
